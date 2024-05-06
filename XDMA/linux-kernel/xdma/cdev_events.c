@@ -49,17 +49,25 @@ static ssize_t char_events_read(struct file *file, char __user *buf,
 		return -EPROTO;
 
 	/*
+	 * Modified by Eyal to have a timeout.
+	 * This is important if more than one thread or process are calling read on the file.
+	 * One reader will be woken by the kernel while the other will hang (until timeout).
 	 * sleep until any interrupt events have occurred,
-	 * or a signal arrived
+	 * or a signal arrived or timeout
 	 */
-	rv = wait_event_interruptible(user_irq->events_wq,
-			user_irq->events_irq != 0);
+	rv = wait_event_interruptible_timeout(user_irq->events_wq,
+			user_irq->events_irq != 0,
+			msecs_to_jiffies(50));
 	if (rv)
 		dbg_sg("wait_event_interruptible=%d\n", rv);
 
 	/* wait_event_interruptible() was interrupted by a signal */
 	if (rv == -ERESTARTSYS)
 		return -ERESTARTSYS;
+
+	/* */
+	if (!rv)
+		return 0;
 
 	/* atomically decide which events are passed to the user */
 	spin_lock_irqsave(&user_irq->events_lock, flags);

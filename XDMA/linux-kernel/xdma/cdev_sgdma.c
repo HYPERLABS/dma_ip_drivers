@@ -104,10 +104,10 @@ static void async_io_handler(unsigned long  cb_hndl, int err)
 	if (caio->cmpl_cnt == caio->req_cnt) {
 		res = caio->res;
 		res2 = caio->res2;
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 0)
-		caio->iocb->ki_complete(caio->iocb, caio->err_cnt ? res2 : res);
-#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 1, 0)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 1, 0)) && (LINUX_VERSION_CODE < KERNEL_VERSION(5, 19, 0))
 		caio->iocb->ki_complete(caio->iocb, res, res2);
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
+		caio->iocb->ki_complete(caio->iocb, res);
 #else
 		aio_complete(caio->iocb, res, res2);
 #endif
@@ -121,10 +121,10 @@ skip_tran:
 	return;
 
 skip_dev_lock:
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 0)
-	caio->iocb->ki_complete(caio->iocb, -EBUSY);
-#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 1, 0)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 1, 0)) && (LINUX_VERSION_CODE < KERNEL_VERSION(5, 19, 0))
 	caio->iocb->ki_complete(caio->iocb, numbytes, -EBUSY);
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
+	caio->iocb->ki_complete(caio->iocb, numbytes);
 #else
 	aio_complete(caio->iocb, numbytes, -EBUSY);
 #endif
@@ -232,6 +232,7 @@ static int check_transfer_align(struct xdma_engine *engine,
 
 /*
  * Map a user memory range into a scatterlist
+ * inspired by vhost_scsi_map_to_sgl()
  * Returns the number of scatterlist entries used or -errno on error.
  */
 static inline void xdma_io_cb_release(struct xdma_io_cb *cb)
@@ -565,12 +566,20 @@ static ssize_t cdev_aio_read(struct kiocb *iocb, const struct iovec *io,
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 16, 0)
 static ssize_t cdev_write_iter(struct kiocb *iocb, struct iov_iter *io)
 {
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 4, 0)
 	return cdev_aio_write(iocb, io->iov, io->nr_segs, io->iov_offset);
+#else
+	return cdev_aio_write(iocb, io->__iov, io->nr_segs, io->iov_offset);
+#endif
 }
 
 static ssize_t cdev_read_iter(struct kiocb *iocb, struct iov_iter *io)
 {
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 4, 0)
 	return cdev_aio_read(iocb, io->iov, io->nr_segs, io->iov_offset);
+#else
+	return cdev_aio_read(iocb, io->__iov, io->nr_segs, io->iov_offset);
+#endif
 }
 #endif
 

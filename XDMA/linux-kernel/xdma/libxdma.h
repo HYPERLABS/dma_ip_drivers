@@ -63,6 +63,8 @@
 #include <linux/swait.h>
 #endif
 
+extern unsigned int poll_mode;
+
 /*
  *  if the config bar is fixed, the driver does not neeed to search through
  *  all of the bars

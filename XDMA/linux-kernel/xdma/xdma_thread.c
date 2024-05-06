@@ -119,7 +119,9 @@ static int xthread_main(void *data)
 					thp->name, thp->work_cnt);
 			/* do work */
 			list_for_each_safe(work_item, next, &thp->work_list) {
+				unlock_thread(thp);  // Unlock & lock are experimental and based on this pull request https://github.com/paulmnt/dma_ip_drivers/pull/1 which hasn't been validated!!!
 				thp->fproc(work_item);
+				lock_thread(thp); // See above, so far this has been working well.
 			}
 		}
 		unlock_thread(thp);

@@ -43,18 +43,27 @@ clean:
 	@/bin/rm -f *.ko modules.order *.mod.c *.o *.o.ur-safe .*.o.cmd
 
 install: all
-	@rm -f /lib/modules/5.15.0-67-generic/extra/xdma.ko
-	@echo "installing kernel modules to /lib/modules/$(shell uname -r)/xdma ..."
-	@mkdir -p -m 755 /lib/modules/$(shell uname -r)/xdma
-	@install -v -m 644 *.ko /lib/modules/$(shell uname -r)/xdma
-	@depmod -a || true
+	$(MAKE) -C $(BUILDSYSTEM_DIR) M=$(PWD)
+	install -m 644 -o root -g root xdma.ko /lib/modules/`uname -r`/kernel/drivers/misc
+	depmod -a
 
-uninstall:
-	@echo "Un-installing /lib/modules/$(shell uname -r)/xdma ..."
-	@/bin/rm -rf /lib/modules/$(shell uname -r)/xdma
-	@depmod -a
-
-
+# copy the udev rules to /etc/udev/rules.d - but only if the file does not already exist
+	@if ! [ -e /etc/udev/rules.d/10-xilinx-xdma.rules ]; \
+	then \
+		cp 10-xilinx-xdma.rules /etc/udev/rules.d/10-xilinx-xdma.rules; \
+		echo "Copied 10-xilinx-xdma.rules to /etc/udev/rules.d"; \
+	fi
+	
+# copy the configuration file /etc/modprobe.d - but only if the file does not already exist
+	@if ! [ -e /etc/modprobe.d ]; \
+	then \
+		mkdir /etc/modprobe.d; \
+	fi
+	@if ! [ -e /etc/modprobe.d/xilinx-xdma.conf ]; \
+	then \
+		cp xilinx-xdma.conf /etc/modprobe.d/xilinx-xdma.conf; \
+		echo "Copied xilinx-xdma.conf to /etc/modprobe.d"; \
+	fi
 
 
 endif
