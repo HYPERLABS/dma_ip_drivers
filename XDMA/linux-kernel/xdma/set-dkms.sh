@@ -1,6 +1,5 @@
 #!/bin/bash
-#This script 
-#1. 
+#This script will use dkms to add, build and install based on dkms.conf and the Makefile in this directory.
 set -e
 src_dir=$(realpath $(dirname $(realpath $0)))
 clean=0
