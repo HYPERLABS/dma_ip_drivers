@@ -44,5 +44,5 @@ if [ $module_already_in_dkms == 1 ]; then
 fi
 sudo dkms add -m $module_name -v $ver
 sudo dkms build -m $module_name -v $ver
-sudo dkms install -m $module_name -v $ver
+sudo dkms install -m $module_name -v $ver --force
 echo Completed setting $module_name-$ver in dkms
