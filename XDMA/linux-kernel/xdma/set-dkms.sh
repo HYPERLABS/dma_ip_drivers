@@ -1,5 +1,6 @@
 #!/bin/bash
-#This script will use dkms to add, build and install based on dkms.conf and the Makefile in this directory.
+# This script will use dkms to add, build and install based on dkms.conf and the Makefile in this directory.
+# When the kernel updates the module will be auto-installed to /lib/modules/`uname -r`/updates/dkms
 set -e
 src_dir=$(realpath $(dirname $(realpath $0)))
 clean=0
