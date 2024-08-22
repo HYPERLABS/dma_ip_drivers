@@ -3830,6 +3830,7 @@ ssize_t xdma_xfer_submit_nowait(void *cb_hndl, void *dev_hndl, int channel,
 	struct xdma_engine *engine;
 	struct xdma_io_cb *cb = (struct xdma_io_cb *)cb_hndl;
 	int rv = 0, tfer_idx = 0;
+	ssize_t done = 0;
 	struct scatterlist *sg = sgt->sgl;
 	int nents;
 	enum dma_data_direction dir = write ? DMA_TO_DEVICE : DMA_FROM_DEVICE;
@@ -3976,9 +3977,13 @@ ssize_t xdma_xfer_submit_nowait(void *cb_hndl, void *dev_hndl, int channel,
 		 * data within single descriptor chain.
 		 */
 		tfer_idx++;
+
+		// Add to the amount of data to return.
+		done += xfer->len;
 	}
 
-	return -EIOCBQUEUED;
+	//return -EIOCBQUEUED;
+	return done ? done : rv;
 
 unmap_sgl:
 	if (!dma_mapped && sgt->nents) {
