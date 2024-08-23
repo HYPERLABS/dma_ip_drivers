@@ -966,11 +966,11 @@ engine_service_final_transfer(struct xdma_engine *engine,
 				}
 			}
 
-			//transfer->desc_cmpl += *pdesc_completed;  // Based on https://github.com/Xilinx/dma_ip_drivers/pull/240/commits/
+			//transfer->desc_cmpl += *pdesc_completed;  // Based on https://github.com/Xilinx/dma_ip_drivers/pull/240/commits/ (xdma: fix decs_cmpl and flush when eop received)
 			if (!(transfer->flags & XFER_FLAG_ST_C2H_EOP_RCVED)) {
 				return NULL;
 			}
-			transfer->desc_cmpl = *pdesc_completed; // Based on https://github.com/Xilinx/dma_ip_drivers/pull/240/commits/
+			transfer->desc_cmpl = *pdesc_completed; // Based on https://github.com/Xilinx/dma_ip_drivers/pull/240/commits/ (xdma: fix decs_cmpl and flush when eop received)
 
 			/* mark transfer as successfully completed */
 			engine_service_shutdown(engine);
@@ -2329,7 +2329,7 @@ static void xdma_desc_link(struct xdma_desc *first, struct xdma_desc *second,
 /* xdma_desc_adjacent -- Set how many descriptors are adjacent to this one */
 static void xdma_desc_adjacent(struct xdma_desc *desc, u32 next_adjacent)
 {
-	// Based on https://github.com/Xilinx/dma_ip_drivers/pull/240/commits/
+	// Based on https://github.com/Xilinx/dma_ip_drivers/pull/240/commits/ (xdma: simplify next_adj setting)
 	// /* remember reserved and control bits */
 	// u32 control = le32_to_cpu(desc->control) & 0x0000f0ffUL;
 	// /* merge adjacent and control field */
@@ -3619,7 +3619,7 @@ ssize_t xdma_xfer_submit(void *dev_hndl, int channel, bool write, u64 ep_addr,
 				for (i = 0; i < xfer->desc_cmpl; i++)
 					done += result[i].length;
 
-				/* finish the whole request when EOP revcived */  // Based on https://github.com/Xilinx/dma_ip_drivers/pull/240/commits/
+				/* finish the whole request when EOP received */  // Based on https://github.com/Xilinx/dma_ip_drivers/pull/240/commits/ (xdma: fix decs_cmpl and flush when eop received)
 				if (engine->eop_flush && (xfer->flags & XFER_FLAG_ST_C2H_EOP_RCVED))
 					nents = 0;
 			} else
@@ -4437,7 +4437,7 @@ static void pci_enable_capability(struct pci_dev *pdev, int cap)
 
 void *xdma_device_open(const char *mname, struct pci_dev *pdev, int *user_max,
 		       int *h2c_channel_max, int *c2h_channel_max)
-// Multiple changes based on https://github.com/Xilinx/dma_ip_drivers/pull/240/commits/
+// Multiple changes based on https://github.com/Xilinx/dma_ip_drivers/pull/240/commits/ (xdma: libxdma: fix resource free on open)
 {
 	struct xdma_dev *xdev = NULL;
 	int rv = 0;
