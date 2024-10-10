@@ -30,7 +30,7 @@ if [ -d "$shadow_src_dir" ]; then
         sudo rm -Ir ${shadow_src_dir}
     
     elif [ $clean == 1 ] && [ $force == 1 ]; then
-        echo -n "$shadow_src_dir already exists, removing "
+        echo "$shadow_src_dir already exists, removing "
         sudo rm -rf ${shadow_src_dir}
     else
         echo "** Error - $shadow_src_dir already exists and must be removed before continuing, run with -c **"
