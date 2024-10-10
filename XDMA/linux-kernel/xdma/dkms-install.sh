@@ -5,7 +5,7 @@ set -e
 src_dir=$(realpath $(dirname $(realpath $0)))
 clean=0
 force=0
-while getopts ch flag 
+while getopts cfh flag 
 do
     case "${flag}" in
         c) clean=1;;
