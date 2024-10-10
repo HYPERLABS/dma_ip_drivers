@@ -4,10 +4,12 @@
 set -e
 src_dir=$(realpath $(dirname $(realpath $0)))
 clean=0
+force=0
 while getopts ch flag 
 do
     case "${flag}" in
         c) clean=1;;
+        f) force=1;;
         h) echo "Usage: ${0##*/} [OPTION]
             -c                      clean shadow source directory if needed
             "
@@ -23,9 +25,13 @@ echo Creating a shadow of the source under $shadow_src_dir
 
 # Verify the shadow source directory doesn't exist.
 if [ -d "$shadow_src_dir" ]; then
-    if [ $clean == 1 ]; then
+    if [ $clean == 1 ] && [ $force == 0 ]; then
         echo -n "$shadow_src_dir already exists, would you like to remove using: sudo rm -Ir ${shadow_src_dir} - "
         sudo rm -Ir ${shadow_src_dir}
+    
+    elif [ $clean == 1 ] && [ $force == 1 ]; then
+        echo -n "$shadow_src_dir already exists, removing "
+        sudo rm -rf ${shadow_src_dir}
     else
         echo "** Error - $shadow_src_dir already exists and must be removed before continuing, run with -c **"
         exit 1
