@@ -44,9 +44,9 @@ sudo cp $src_dir/* $shadow_src_dir/
 sudo cp $src_dir/../include/libxdma_api.h $shadow_src_dir/
 
 # Add to dkms, build and install.
-module_already_in_dkms=$(dkms status | grep -q "$module_name/$ver" && echo 1 || echo 0)
-if [ $module_already_in_dkms == 1 ]; then
-    sudo dkms remove $module_name/$ver --all
+module_already_in_dkms_for_current_kernel=$(dkms status | grep -q "$module_name/$ver" && echo 1 || echo 0)
+if [ $module_already_in_dkms_for_current_kernel == 1 ]; then
+    sudo dkms remove $module_name/$ver
 fi
 sudo dkms add -m $module_name -v $ver
 sudo dkms build -m $module_name -v $ver
